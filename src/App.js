@@ -3,35 +3,75 @@ import logo from "./logo.svg";
 import "./App.css";
 
 function App() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [importance, setImportance] = useState("Low");
+  const [toDoList, setToDoList] = useState([]);
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <ToDoComponent />
+        <ToDoComponent
+          title={title}
+          setTitle={setTitle}
+          description={description}
+          setDescription={setDescription}
+          importance={importance}
+          setImportance={setImportance}
+          toDoList={toDoList}
+          setToDoList={setToDoList}
+        />
       </header>
     </div>
   );
 }
 
-const ToDoComponent = () => {
-  const [title, setTitle] = useState("");
+const importanceAttributes = [
+  {
+    level: "Low",
+    color: "yellow",
+  },
+  {
+    level: "Medium",
+    color: "orange",
+  },
+  {
+    level: "High",
+    color: "red",
+  },
+  {
+    level: "Critcal",
+    color: "purple",
+  },
+];
 
-  const [description, setDescription] = useState("");
+const ToDo = (props) => {
+  return (
+    <li style={{ color: props.color }}>
+      <h2>{props.title}</h2>
+      <p>{props.description}</p>
+      <h3>{props.importance}</h3>
+      <hr />
+    </li>
+  );
+};
 
-  const [importance, setImportance] = useState("low");
+const ImportanceLevelSelector = (props) => {
+  return <option value={props.level}>{props.level}</option>;
+};
 
-  const [toDoList, setToDoList] = useState([]);
-
+const ToDoComponent = (props) => {
   return (
     <div>
       <div>
         Title &nbsp;
         <input
           type="text"
-          value={title}
+          value={props.title}
           onChange={(event) => {
             const newTitle = event.target.value;
-            setTitle(newTitle);
+            props.setTitle(newTitle);
           }}
         ></input>
       </div>
@@ -40,10 +80,10 @@ const ToDoComponent = () => {
         Description &nbsp;
         <input
           type="text"
-          value={description}
+          value={props.description}
           onChange={(event) => {
             const newDescription = event.target.value;
-            setDescription(newDescription);
+            props.setDescription(newDescription);
           }}
         ></input>
       </div>
@@ -51,39 +91,54 @@ const ToDoComponent = () => {
       <select
         onChange={(event) => {
           const newImportance = event.target.value;
-          setImportance(newImportance);
+          props.setImportance(newImportance);
         }}
       >
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
+        {importanceAttributes.map((element, index) => {
+          return (
+            <ImportanceLevelSelector
+              key={index}
+              level={element.level}
+            ></ImportanceLevelSelector>
+          );
+        })}
       </select>
       <span>
         &nbsp;
         <button
           type="submit"
-          onClick={(event) => {
-            const newToDoListItem = { title, description, importance };
-            const updatedToDoList = [...toDoList];
-            updatedToDoList.push(newToDoListItem);
-            setToDoList(updatedToDoList);
-            console.log(updatedToDoList);
-            setTitle("");
-            setDescription("");
-            setImportance("low");
-          }}
+          onClick={
+            ("click",
+            () => {
+              const updatedToDoList = [...props.toDoList];
+              updatedToDoList.push({
+                title: props.title,
+                description: props.description,
+                importance: props.importance,
+              });
+              props.setToDoList(updatedToDoList);
+              // console.log(updatedToDoList);
+              props.setTitle("");
+              props.setDescription("");
+              props.setImportance(importanceAttributes[0].level);
+            })
+          }
         >
           Submit
         </button>
         <div>
-          {toDoList.map((element, index) => {
+          {props.toDoList.map((todo, index) => {
+            const importanceColor = importanceAttributes.find((option) => {
+              return option.level === todo.importance;
+            }).color;
             return (
-              <div key={index}>
-                <p>Task: {element.title}</p>
-                <p>Description: {element.description}</p>
-                <p>Importance: {element.importance}</p>
-                <hr />
-              </div>
+              <ToDo
+                title={todo.title}
+                description={todo.description}
+                importance={todo.importance}
+                color={importanceColor}
+                key={index}
+              ></ToDo>
             );
           })}
         </div>
